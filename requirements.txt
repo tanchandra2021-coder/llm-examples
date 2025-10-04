@@ -8,3 +8,4 @@ streamlit-feedback
 langchain-community
 gpt4all
 transformers
+torch
