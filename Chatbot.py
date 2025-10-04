@@ -4,7 +4,6 @@ import openai
 # -------------------
 # 🔑 OpenAI API Key
 # -------------------
-# Keeping your key hardcoded as requested
 openai.api_key = "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"
 
 # -------------------
@@ -61,15 +60,18 @@ if prompt := st.chat_input(f"Ask {leader_name} a finance or business question...
     with st.chat_message("user"):
         st.write(prompt)
 
-    # Call OpenAI GPT-3.5
+    # -------------------
+    # 💬 Use OpenAI v2 API (new syntax)
+    # -------------------
     with st.spinner(f"{leader_name} is thinking..."):
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5",
+        client = openai.OpenAI(api_key=openai.api_key)
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
             messages=st.session_state.messages[leader_name],
             temperature=0.7,
             max_tokens=300
         )
-        reply = response['choices'][0]['message']['content']
+        reply = response.choices[0].message.content
 
     # Append assistant message
     st.session_state.messages[leader_name].append({"role": "assistant", "content": reply})
@@ -84,3 +86,4 @@ st.markdown("""
 Developed with ❤️ using Streamlit & OpenAI GPT-3.5
 </div>
 """, unsafe_allow_html=True)
+
