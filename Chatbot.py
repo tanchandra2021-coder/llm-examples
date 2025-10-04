@@ -4,7 +4,7 @@ import openai
 # -------------------
 # 🔑 OpenAI API Key
 # -------------------
-openai.api_key = "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"
+openai.api_key = "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"
 
 # -------------------
 # 👩‍💻 Leaders Dictionary
