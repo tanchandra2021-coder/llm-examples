@@ -1,15 +1,13 @@
 from streamlit.testing.v1 import AppTest
 
-def test_chatbot_component():
-    # Load the chatbot app
+def test_chatbot_loads():
     at = AppTest.from_file("Chatbot.py").run()
     assert not at.exception
 
-    # Simulate typing a question
-    at.components_v1_html[0].set_value("Do you know any jokes?").run()
+    # Simulate user typing a question
+    at.chat_input[0].set_value("What is the best investment strategy?").run()
     print(at)
 
-    # Since Puter.js runs in the browser, we can't test the real AI response here.
-    # But we can assert the HTML component exists and no exceptions were thrown
+    # Can't test GPT4All output (runs locally), but we can check the chat system works
     assert not at.exception
 
