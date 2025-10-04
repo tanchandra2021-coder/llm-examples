@@ -1,13 +1,32 @@
-from streamlit.testing.v1 import AppTest
+# app.py
+import streamlit as st
+from chatbot import *  # Import all the chatbot logic you wrote
 
-def test_chatbot_loads():
-    at = AppTest.from_file("Chatbot.py").run()
-    assert not at.exception
+# -------------------
+# App Page Setup
+# -------------------
+st.set_page_config(
+    page_title="Finance Leaders Chatbot",
+    layout="wide"
+)
 
-    # Simulate user typing a question
-    at.chat_input[0].set_value("What is the best investment strategy?").run()
-    print(at)
+st.markdown('<h1 style="text-align:center; color:#00e6ac;">💼 Finance Leaders AI Chat</h1>', unsafe_allow_html=True)
 
-    # Can't test GPT4All output (runs locally), but we can check the chat system works
-    assert not at.exception
+# -------------------
+# Leader Selection and Chat handled in chatbot.py
+# -------------------
+# Your existing chatbot.py already handles:
+# - Leader selection
+# - Chat input
+# - GPT-3.5 responses
+# - Maintaining session_state messages
+# So we just import it above and it will run in this app
 
+# -------------------
+# Optional: Footer / Credits
+# -------------------
+st.markdown("""
+<div style="text-align:center; margin-top:40px; color:#aaa;">
+Developed with ❤️ using Streamlit & OpenAI GPT-3.5
+</div>
+""", unsafe_allow_html=True)
