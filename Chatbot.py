@@ -1,5 +1,5 @@
 import streamlit as st
-from gpt4all import GPT4All
+from transformers import pipeline
 
 # -------------------
 # 🌟 Page Config
@@ -42,16 +42,16 @@ leader = leaders[leader_name]
 st.image(leader["avatar"], width=180, caption=leader_name)
 
 # -------------------
-# 💬 Initialize GPT4All
+# 💬 Initialize Text Generation Pipeline
 # -------------------
-if "model" not in st.session_state:
-    st.session_state.model = GPT4All("ggml-gpt4all-j-v1.3-groovy")  # Free local model
+if "generator" not in st.session_state:
+    # Using a free open-source model hosted by Hugging Face
+    st.session_state.generator = pipeline("text-generation", model="EleutherAI/gpt-neo-2.7B")
 
 # -------------------
 # 💬 Chat History
 # -------------------
 if "messages" not in st.session_state:
-    # Start with a system message defining the leader persona
     st.session_state.messages = [
         {"role": "system", "content": f"You are a financial expert, {leader_name}, speaking in a {leader['style']} style."}
     ]
@@ -72,12 +72,11 @@ for msg in st.session_state.messages[1:]:
 # ✍️ Chat Input
 # -------------------
 if prompt := st.chat_input(f"Ask {leader_name} a finance or business question..."):
-    # Append user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
 
-    # Prepare GPT4All prompt including full conversation for context
+    # Build conversation string for context
     conversation = "\n".join(
         [f"{'User' if m['role']=='user' else leader_name}: {m['content']}" for m in st.session_state.messages[1:]]
     )
@@ -85,10 +84,13 @@ if prompt := st.chat_input(f"Ask {leader_name} a finance or business question...
     full_prompt = f"{system_msg}\n{conversation}\n{leader_name}:"
 
     # Generate assistant response
-    reply = st.session_state.model.generate(full_prompt, max_tokens=300)
-    
-    # Display assistant response
+    reply = st.session_state.generator(full_prompt, max_length=250, do_sample=True, temperature=0.7)[0]["generated_text"]
+
+    # Remove the prompt prefix from output (keep only AI's response)
+    if reply.startswith(full_prompt):
+        reply = reply[len(full_prompt):].strip()
+
+    # Append and display assistant message
     st.session_state.messages.append({"role": "assistant", "content": reply})
     with st.chat_message("assistant"):
         st.write(reply)
-
