@@ -1,39 +1,5 @@
 import streamlit as st
-import torch
-from transformers import pipeline
-
-# -------------------
-# 🌟 Page Config
-# -------------------
-st.set_page_config(page_title="💼 HerStory Finance Chatbot", page_icon="💬", layout="centered")
-
-# -------------------
-# 👩‍💼 Women Leaders Data
-# -------------------
-leaders = {
-    "Indra Nooyi": {
-        "avatar": "https://upload.wikimedia.org/wikipedia/commons/1/10/Indra_Nooyi_2011.jpg",
-        "style": "strategic, practical, and focused on global business leadership and corporate growth"
-    },
-    "Christine Lagarde": {
-        "avatar": "https://upload.wikimedia.org/wikipedia/commons/0/09/Christine_Lagarde_2021.jpg",
-        "style": "authoritative, macroeconomic, and focused on monetary policy and global finance"
-    },
-    "Janet Yellen": {
-        "avatar": "https://upload.wikimedia.org/wikipedia/commons/5/50/Janet_Yellen_official_Federal_Reserve_portrait.jpg",
-        "style": "thoughtful, data-driven, and focused on economic stability and policy impacts"
-    },
-    "Suze Orman": {
-        "avatar": "https://upload.wikimedia.org/wikipedia/commons/5/52/Suze_Orman_2010.jpg",
-        "style": "approachable, empowering, and focused on personal finance and wealth building"
-    }
-}
-
-# -------------------
-# 🎨 UI - Header
-# -------------------
-st.title("💼 HerStory Finance Chatbot")
-st.caption("💬 Ask questions about business, economics, or personal finance — answered in the voice of iconic women leaders.")
+import openai
 
 # -------------------
 # 👩‍💻 Leader Selection
@@ -43,11 +9,11 @@ leader = leaders[leader_name]
 st.image(leader["avatar"], width=180, caption=leader_name)
 
 # -------------------
-# 💬 Initialize Text Generation Pipeline
+# 🔑 OpenAI API Key
 # -------------------
-if "generator" not in st.session_state:
-    # Using a free open-source model hosted by Hugging Face
-    st.session_state.generator = pipeline("text-generation", model="EleutherAI/gpt-neo-2.7B")
+# Recommended: store as environment variable for security
+# openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = "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"
 
 # -------------------
 # 💬 Chat History
@@ -77,19 +43,15 @@ if prompt := st.chat_input(f"Ask {leader_name} a finance or business question...
     with st.chat_message("user"):
         st.write(prompt)
 
-    # Build conversation string for context
-    conversation = "\n".join(
-        [f"{'User' if m['role']=='user' else leader_name}: {m['content']}" for m in st.session_state.messages[1:]]
-    )
-    system_msg = st.session_state.messages[0]["content"]
-    full_prompt = f"{system_msg}\n{conversation}\n{leader_name}:"
-
-    # Generate assistant response
-    reply = st.session_state.generator(full_prompt, max_length=250, do_sample=True, temperature=0.7)[0]["generated_text"]
-
-    # Remove the prompt prefix from output (keep only AI's response)
-    if reply.startswith(full_prompt):
-        reply = reply[len(full_prompt):].strip()
+    # Call OpenAI GPT-3.5 for response
+    with st.spinner(f"{leader_name} is thinking..."):
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5",
+            messages=st.session_state.messages,
+            temperature=0.7,
+            max_tokens=300
+        )
+        reply = response['choices'][0]['message']['content']
 
     # Append and display assistant message
     st.session_state.messages.append({"role": "assistant", "content": reply})
